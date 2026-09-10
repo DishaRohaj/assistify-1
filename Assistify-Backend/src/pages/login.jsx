@@ -1,8 +1,12 @@
 import React, { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
+import { apiRequest } from "../api/client";
+console.log("MARKER_12345 - this is the real file")
 /**
  * Assistify Login Page
- * Two-panel layout: purple brand/feature panel (left) + login form (right)
+ * Two-panel layout:
+ * Left  = Brand + Features
+ * Right = Login Form
  */
 
 const FEATURES = [
@@ -45,13 +49,36 @@ function FeatureIcon({ icon }) {
 
 function FeatureRow({ icon, title, description }) {
   return (
-    <div style={{ display: "flex", gap: 16, alignItems: "flex-start", marginBottom: 28 }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 16,
+        alignItems: "flex-start",
+        marginBottom: 28,
+      }}
+    >
       <FeatureIcon icon={icon} />
+
       <div>
-        <div style={{ fontWeight: 700, fontSize: 16, color: "#1a1a2e", marginBottom: 4 }}>
+        <div
+          style={{
+            fontWeight: 700,
+            fontSize: 16,
+            color: "#1a1a2e",
+            marginBottom: 4,
+          }}
+        >
           {title}
         </div>
-        <div style={{ fontSize: 13.5, color: "#e8e6f7", lineHeight: 1.4, maxWidth: 300 }}>
+
+        <div
+          style={{
+            fontSize: 13.5,
+            color: "#e8e6f7",
+            lineHeight: 1.4,
+            maxWidth: 300,
+          }}
+        >
           {description}
         </div>
       </div>
@@ -60,18 +87,106 @@ function FeatureRow({ icon, title, description }) {
 }
 
 export default function AssistifyLogin() {
+  const navigate = useNavigate();
+
+  // =========================
+  // STATE
+  // =========================
+
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({ identifier: "", password: "" });
+
+  const [form, setForm] = useState({
+    identifier: "",
+    password: "",
+  });
+
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleChange = (field) => (e) =>
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Wire this up to POST /api/auth/login once the backend is ready.
-    console.log("Login attempt:", { ...form, rememberMe });
+  const [loading, setLoading] = useState(false);
+
+  // =========================
+  // HANDLE INPUT CHANGE
+  // =========================
+
+  const handleChange = (field) => (e) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+
+    // Clear previous error when user starts typing
+    if (error) {
+      setError("");
+    }
   };
+
+  // =========================
+  // LOGIN
+  // =========================
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setError("");
+
+    // Basic validation
+    if (!form.identifier.trim()) {
+      setError("Please enter your email.");
+      return;
+    }
+
+    if (!form.password.trim()) {
+      setError("Please enter your password.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const data = await apiRequest("/auth/login", {
+        method: "POST",
+        auth: false,
+        body: {
+          email: form.identifier,
+          password: form.password,
+        },
+      });
+
+      // =========================
+      // STORE LOGIN DATA
+      // =========================
+
+      const userData = {
+        email: data.email,
+        role: data.role,
+        fullName: data.fullName,
+      };
+
+      if (rememberMe) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(userData));
+      } else {
+        sessionStorage.setItem("token", data.token);
+        sessionStorage.setItem("user", JSON.stringify(userData));
+      }
+
+      // =========================
+      // GO TO DASHBOARD
+      // =========================
+
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Invalid email or password.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =========================
+  // UI
+  // =========================
 
   return (
     <div
@@ -83,11 +198,15 @@ export default function AssistifyLogin() {
         background: "#ffffff",
       }}
     >
-      {/* LEFT PANEL */}
+      {/* =========================================
+          LEFT PANEL
+      ========================================= */}
+
       <div
         style={{
           flex: "0 0 42%",
-          background: "linear-gradient(160deg, #8b8fd6 0%, #9b8fe0 100%)",
+          background:
+            "linear-gradient(160deg, #8b8fd6 0%, #9b8fe0 100%)",
           padding: "48px 56px",
           display: "flex",
           flexDirection: "column",
@@ -96,7 +215,8 @@ export default function AssistifyLogin() {
           overflow: "hidden",
         }}
       >
-        {/* decorative soft circle */}
+        {/* Decorative Circle */}
+
         <div
           style={{
             position: "absolute",
@@ -109,14 +229,26 @@ export default function AssistifyLogin() {
           }}
         />
 
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 56, zIndex: 1 }}>
+        {/* =========================================
+            LOGO
+        ========================================= */}
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+            marginBottom: 56,
+            zIndex: 1,
+          }}
+        >
           <div
             style={{
               width: 52,
               height: 52,
               borderRadius: 12,
-              background: "linear-gradient(135deg, #4b3fb5, #6a5ce0)",
+              background:
+                "linear-gradient(135deg, #4b3fb5, #6a5ce0)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -127,15 +259,34 @@ export default function AssistifyLogin() {
           >
             A
           </div>
+
           <div>
-            <div style={{ color: "#fff", fontWeight: 800, fontSize: 22, letterSpacing: 0.5 }}>
+            <div
+              style={{
+                color: "#fff",
+                fontWeight: 800,
+                fontSize: 22,
+                letterSpacing: 0.5,
+              }}
+            >
               ASSISTIFY
             </div>
-            <div style={{ color: "#e8e6f7", fontSize: 12 }}>Intelligent IT Service Desk</div>
+
+            <div
+              style={{
+                color: "#e8e6f7",
+                fontSize: 12,
+              }}
+            >
+              Intelligent IT Service Desk
+            </div>
           </div>
         </div>
 
-        {/* Headline */}
+        {/* =========================================
+            HEADLINE
+        ========================================= */}
+
         <h1
           style={{
             color: "#1a1a2e",
@@ -150,14 +301,23 @@ export default function AssistifyLogin() {
           Smart, simple and efficient IT support.
         </h1>
 
-        {/* Features */}
+        {/* =========================================
+            FEATURES
+        ========================================= */}
+
         <div style={{ zIndex: 1 }}>
-          {FEATURES.map((f) => (
-            <FeatureRow key={f.title} {...f} />
+          {FEATURES.map((feature) => (
+            <FeatureRow
+              key={feature.title}
+              {...feature}
+            />
           ))}
         </div>
 
-        {/* Arrow divider circle */}
+        {/* =========================================
+            ARROW
+        ========================================= */}
+
         <div
           style={{
             position: "absolute",
@@ -181,7 +341,10 @@ export default function AssistifyLogin() {
         </div>
       </div>
 
-      {/* RIGHT PANEL */}
+      {/* =========================================
+          RIGHT PANEL
+      ========================================= */}
+
       <div
         style={{
           flex: 1,
@@ -191,40 +354,113 @@ export default function AssistifyLogin() {
           padding: "48px 24px",
         }}
       >
-        <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: 380 }}>
-          <h2 style={{ color: "#7c3aed", fontSize: 36, fontWeight: 800, marginBottom: 8 }}>
-            Welcome !
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            width: "100%",
+            maxWidth: 380,
+          }}
+        >
+          {/* =========================================
+              WELCOME
+          ========================================= */}
+
+          <h2
+            style={{
+              color: "#7c3aed",
+              fontSize: 36,
+              fontWeight: 800,
+              marginBottom: 8,
+            }}
+          >
+            Welcome!
           </h2>
-          <p style={{ color: "#4a4a5a", fontSize: 14.5, marginBottom: 32 }}>
+
+          <p
+            style={{
+              color: "#4a4a5a",
+              fontSize: 14.5,
+              marginBottom: 32,
+            }}
+          >
             Sign in to your Assistify account
           </p>
 
-          <label style={{ display: "block", fontWeight: 700, fontSize: 13.5, color: "#1a1a2e", marginBottom: 8 }}>
+          {/* =========================================
+              EMAIL
+          ========================================= */}
+
+          <label
+            style={{
+              display: "block",
+              fontWeight: 700,
+              fontSize: 13.5,
+              color: "#1a1a2e",
+              marginBottom: 8,
+            }}
+          >
             User ID / Email
           </label>
+
           <input
             type="text"
             placeholder="Enter your email"
             value={form.identifier}
             onChange={handleChange("identifier")}
-            style={inputStyle}
+            disabled={loading}
+            style={{
+              ...inputStyle,
+              opacity: loading ? 0.7 : 1,
+            }}
           />
 
-          <label style={{ display: "block", fontWeight: 700, fontSize: 13.5, color: "#1a1a2e", margin: "20px 0 8px" }}>
+          {/* =========================================
+              PASSWORD
+          ========================================= */}
+
+          <label
+            style={{
+              display: "block",
+              fontWeight: 700,
+              fontSize: 13.5,
+              color: "#1a1a2e",
+              margin: "20px 0 8px",
+            }}
+          >
             Password
           </label>
-          <div style={{ position: "relative" }}>
+
+          <div
+            style={{
+              position: "relative",
+            }}
+          >
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               value={form.password}
               onChange={handleChange("password")}
-              style={{ ...inputStyle, paddingRight: 44 }}
+              disabled={loading}
+              style={{
+                ...inputStyle,
+                paddingRight: 44,
+                opacity: loading ? 0.7 : 1,
+              }}
             />
+
+            {/* Show / Hide Password */}
+
             <button
               type="button"
-              onClick={() => setShowPassword((s) => !s)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              onClick={() =>
+                setShowPassword((prev) => !prev)
+              }
+              disabled={loading}
+              aria-label={
+                showPassword
+                  ? "Hide password"
+                  : "Show password"
+              }
               style={{
                 position: "absolute",
                 right: 14,
@@ -232,7 +468,9 @@ export default function AssistifyLogin() {
                 transform: "translateY(-50%)",
                 background: "none",
                 border: "none",
-                cursor: "pointer",
+                cursor: loading
+                  ? "not-allowed"
+                  : "pointer",
                 fontSize: 16,
                 color: "#8a8a9a",
               }}
@@ -241,38 +479,132 @@ export default function AssistifyLogin() {
             </button>
           </div>
 
+          {/* =========================================
+              REMEMBER ME + FORGOT PASSWORD
+          ========================================= */}
+
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              margin: "20px 0 28px",
+              margin: "20px 0 20px",
             }}
           >
-            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13.5, color: "#4a4a5a", cursor: "pointer" }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 13.5,
+                color: "#4a4a5a",
+                cursor: "pointer",
+              }}
+            >
               <input
                 type="checkbox"
                 checked={rememberMe}
-                onChange={() => setRememberMe((r) => !r)}
-                style={{ width: 16, height: 16, accentColor: "#7c3aed" }}
+                onChange={() =>
+                  setRememberMe((prev) => !prev)
+                }
+                disabled={loading}
+                style={{
+                  width: 16,
+                  height: 16,
+                  accentColor: "#7c3aed",
+                }}
               />
+
               Remember me
             </label>
-            <a href="#forgot" style={{ fontSize: 13.5, color: "#7c3aed", textDecoration: "none", fontWeight: 600 }}>
+
+            <a
+              href="#forgot"
+              style={{
+                fontSize: 13.5,
+                color: "#7c3aed",
+                textDecoration: "none",
+                fontWeight: 600,
+              }}
+            >
               Forgot Password?
             </a>
           </div>
 
-          <button type="submit" style={loginButtonStyle}>
-            Login
+          {/* =========================================
+              ERROR MESSAGE
+          ========================================= */}
+
+          {error && (
+            <p
+              className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"
+              style={{
+                marginBottom: 12,
+              }}
+            >
+              {error}
+            </p>
+          )}
+
+          {/* =========================================
+              LOGIN BUTTON
+          ========================================= */}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-purple-600 text-white font-semibold py-3 rounded-full hover:bg-purple-700 disabled:opacity-60"
+            style={{
+              width: "100%",
+              padding: "14px",
+              borderRadius: 999,
+              border: "none",
+              background:
+                "linear-gradient(135deg, #7c3aed, #6d28d9)",
+              color: "#fff",
+              fontWeight: 700,
+              fontSize: 15.5,
+              cursor: loading
+                ? "not-allowed"
+                : "pointer",
+              opacity: loading ? 0.6 : 1,
+            }}
+          >
+            {loading ? "Signing in..." : "Login"}
           </button>
 
-          <div style={{ borderTop: "1px solid #eee", margin: "28px 0 20px" }} />
+          {/* =========================================
+              DIVIDER
+          ========================================= */}
 
-          <p style={{ textAlign: "center", fontSize: 13.5, color: "#4a4a5a" }}>
+          <div
+            style={{
+              borderTop: "1px solid #eee",
+              margin: "28px 0 20px",
+            }}
+          />
+
+          {/* =========================================
+              HELP
+          ========================================= */}
+
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: 13.5,
+              color: "#4a4a5a",
+            }}
+          >
             Need help accessing your account?
             <br />
-            <a href="#contact" style={{ color: "#8a8a9a", textDecoration: "none" }}>
+
+            <a
+              href="#contact"
+              style={{
+                color: "#8a8a9a",
+                textDecoration: "none",
+              }}
+            >
               Contact Service Desk
             </a>
           </p>
@@ -281,6 +613,8 @@ export default function AssistifyLogin() {
     </div>
   );
 }
+
+
 
 const inputStyle = {
   width: "100%",
@@ -291,16 +625,5 @@ const inputStyle = {
   fontSize: 14,
   outline: "none",
   color: "#1a1a2e",
-};
-
-const loginButtonStyle = {
-  width: "100%",
-  padding: "14px",
-  borderRadius: 10,
-  border: "none",
-  background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
-  color: "#fff",
-  fontWeight: 700,
-  fontSize: 15.5,
-  cursor: "pointer",
+  background: "#ffffff",
 };
