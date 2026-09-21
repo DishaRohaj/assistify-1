@@ -7,4 +7,6 @@ public class RegisterRequestDTO {
     private String email;
     private String password;
     private String fullName;
+    private String department;
+    private String location;
 }

@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class CreateRequestDTO {
     private String description;
-    private Long raisedByUserId;
+    private String category;
 }

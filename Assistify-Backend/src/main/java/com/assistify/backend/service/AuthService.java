@@ -34,7 +34,7 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
 
-        return new AuthResponseDTO(token, user.getId(), user.getEmail(), user.getFullName(), user.getRole().name());
+        return new AuthResponseDTO(token, user.getId(), user.getEmail(), user.getFullName(), user.getRole().name(), user.getDepartment());
     }
 
 
@@ -47,6 +47,8 @@ public class AuthService {
         User user = new User();
         user.setEmail(dto.getEmail());
         user.setFullName(dto.getFullName());
+        user.setDepartment(dto.getDepartment());
+        user.setLocation(dto.getLocation());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRole(User.Role.USER);
 

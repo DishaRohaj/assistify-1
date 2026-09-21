@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { LayoutDashboard, ClipboardList, PlusCircle, Bot, BookOpen, HelpCircle, User, LogOut } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -10,6 +11,14 @@ const navItems = [
 ]
 
 function UserLayout() {
+    const navigate = useNavigate()
+    const handleLogout = () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        sessionStorage.removeItem('token')
+        sessionStorage.removeItem('user')
+        navigate('/login')
+    }
     return (
         <div className="flex h-screen bg-gray-50">
             {/* Sidebar */}
@@ -39,14 +48,23 @@ function UserLayout() {
                     </nav>
                 </div>
 
-                <div className="px-3 pb-4 flex flex-col gap-1 border-t border-gray-100 pt-4">
-                    <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
-                        <HelpCircle size={18} /> Help / Support
-                    </button>
-                    <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
+
+                    <div className="px-3 pb-4 flex flex-col gap-1 border-t border-gray-100 pt-4">
+                        <button
+                            onClick={() => navigate('/help-support')}
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
+                        >
+                            <HelpCircle size={18} /> Help / Support
+                        </button>
+
+                    <button
+                        onClick={() => navigate('/user-profile')}
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
+                    >
                         <User size={18} /> User Profile
                     </button>
-                    <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
+
+                    <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
                         <LogOut size={18} /> Logout
                     </button>
                 </div>

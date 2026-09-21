@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { apiRequest } from '../api/client'
 import logo from '../assets/logo.jpeg'
 import {
     Eye,
@@ -28,24 +30,62 @@ const features = [
 ]
 
 function Login() {
+    const navigate = useNavigate()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [remember, setRemember] = useState(false)
+    const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
+        setError('')
+        setLoading(true)
 
-        // Later:
-        // POST /api/auth/login
-        // Store JWT
-        // Navigate according to role
+        try {
+            const data = await apiRequest('/auth/login', {
+                method: 'POST',
+                auth: false,
+                body: { email, password },
+            })
 
-        console.log({
-            email,
-            password,
-            remember
-        })
+
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+            sessionStorage.removeItem('token')
+            sessionStorage.removeItem('user')
+
+
+            const storage = remember ? localStorage : sessionStorage
+            storage.setItem('token', data.token)
+            storage.setItem('user', JSON.stringify({
+                userId: data.userId,
+                email: data.email,
+                role: data.role,
+                fullName: data.fullName,
+                department: data.department,
+            }))
+
+
+
+
+            const roleRoutes = {
+                USER: '/dashboard',
+                SERVICE_DESK: '/service-desk/dashboard',
+                L1_SUPPORT: '/agent/dashboard',
+                L2_SUPPORT: '/agent/dashboard',
+                MANAGER: '/manager/dashboard',
+                ADMIN: '/admin/dashboard',
+            }
+
+            navigate(roleRoutes[data.role] || '/dashboard')
+
+        } catch (err) {
+            setError(err.message || 'Invalid email or password.')
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -184,8 +224,19 @@ function Login() {
                         Welcome !
                     </h2>
 
-                    <p className="text-[10px] text-gray-600 mb-7">
+                    <p className="text-[10px] text-gray-600 mb-2">
                         Sign in to your Assistify account
+                    </p>
+
+                    <p className="text-[10px] text-gray-500 mb-7">
+                        New to Assistify?{' '}
+                        <button
+                            type="button"
+                            onClick={() => navigate('/register')}
+                            className="text-[#8B4DFF] font-medium hover:underline"
+                        >
+                            Create an account
+                        </button>
                     </p>
 
 
@@ -328,8 +379,17 @@ function Login() {
 
 
                         {/* ================= LOGIN BUTTON ================= */}
+                        {/* ================= ERROR ================= */}
+                        {error && (
+                            <p className="text-[10px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                                {error}
+                            </p>
+                        )}
+
+                        {/* ================= LOGIN BUTTON ================= */}
                         <button
                             type="submit"
+                            disabled={loading}
                             className="
                                 w-full
                                 h-[35px]
@@ -340,9 +400,10 @@ function Login() {
                                 rounded-full
                                 hover:bg-[#793de8]
                                 transition
+                                disabled:opacity-60
                             "
                         >
-                            Login
+                            {loading ? 'Signing in...' : 'Login'}
                         </button>
 
 
