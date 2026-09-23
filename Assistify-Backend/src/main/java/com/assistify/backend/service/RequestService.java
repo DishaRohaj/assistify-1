@@ -33,6 +33,8 @@ public class RequestService {
         Request request = new Request();
         request.setDescription(dto.getDescription());
         request.setRaisedBy(user);
+        request.setAdditionalDetails(dto.getAdditionalDetails());
+        request.setContactPreference(dto.getContactPreference());
         if (dto.getCategory() != null && !dto.getCategory().isBlank()) {
             request.setCategory(Request.Category.valueOf(dto.getCategory()));
         }
@@ -101,11 +103,23 @@ public class RequestService {
                 || user.getRole() == User.Role.MANAGER
                 || user.getRole() == User.Role.ADMIN;
 
+
         if (!isOwner && !isStaff) {
             throw new RuntimeException("You are not allowed to view this request.");
         }
 
         return request;
+
+
+    }
+    public RequestAttachment getAttachmentForDownload(Long requestId, Long attachmentId, User user) {
+        getByIdForUser(requestId, user); // throws if user isn't the owner or staff
+        RequestAttachment attachment = attachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> new RuntimeException("Attachment not found: " + attachmentId));
+        if (!attachment.getRequest().getId().equals(requestId)) {
+            throw new RuntimeException("Attachment does not belong to this request.");
+        }
+        return attachment;
     }
 
     public Request assignAgent(Long requestId, Long assignedToUserId) {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Check, RotateCcw } from 'lucide-react'
 import { apiRequest } from '../api/client'
+import AttachmentsList from '../components/AttachmentsList'
 
 const statusColor = {
     OPEN: 'bg-purple-100 text-purple-700',
@@ -155,6 +156,7 @@ function RequestDetail() {
                             <p className="text-sm text-gray-700">{ticket.resolutionSummary}</p>
                         </div>
                     )}
+                    <AttachmentsList requestId={id} attachments={ticket.attachments} />
 
                     {ticket.status === 'PENDING_USER_CONFIRMATION' && (
                         <div className="bg-white rounded-xl border border-orange-200 shadow-sm p-6 space-y-4">

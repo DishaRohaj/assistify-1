@@ -55,8 +55,13 @@ public class Request {
     @Column(length = 2000)
     private String resolutionSummary;
 
-    @Column(length = 1000)
+    @Column(length = 2000)
     private String reopenReason;
+
+    @Column(length = 2000)
+    private String additionalDetails;
+
+    private String contactPreference;
 
     @OneToMany(
             mappedBy = "request",

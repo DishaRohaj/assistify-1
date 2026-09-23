@@ -13,6 +13,7 @@ function RaiseRequest() {
     const [selectedFile, setSelectedFile] = useState(null)
     const [uploading, setUploading] = useState(false)
     const fileInputRef = useRef(null)
+    const [additionalDetails, setAdditionalDetails] = useState('')
 
     const currentUser = JSON.parse(
         localStorage.getItem('user') || sessionStorage.getItem('user') || 'null'
@@ -25,7 +26,7 @@ function RaiseRequest() {
         try {
             const data = await apiRequest('/requests', {
                 method: 'POST',
-                body: { category, description },
+                body: { category, description,additionalDetails, contactPreference: contact },
             })
             setTicketId(data.id)
 
@@ -120,6 +121,8 @@ function RaiseRequest() {
                         </label>
                         <textarea
                             rows={3}
+                            value={additionalDetails}
+                            onChange={(e) => setAdditionalDetails(e.target.value)}
                             placeholder="Please include what happened, when it started and any error message you may have seen."
                             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none"
                         />

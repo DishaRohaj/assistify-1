@@ -1,16 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { apiRequest } from '../api/client'
 import { Download } from 'lucide-react'
 
 function Reports() {
     const [requests, setRequests] = useState([])
+    const [activeFilter, setActiveFilter] = useState(null)
+    const agentTableRef = useRef(null)
 
     useEffect(() => {
         apiRequest('/requests/all').then(setRequests).catch(console.error)
     }, [])
 
     const total = requests.length
-    const resolved = requests.filter(r => ['RESOLVED', 'CLOSED'].includes(r.status)).length
+    const resolvedList = requests.filter(r => ['RESOLVED', 'CLOSED'].includes(r.status))
+    const resolved = resolvedList.length
     const resolvedPct = total === 0 ? 0 : Math.round((resolved / total) * 100)
 
     const byCategory = requests.reduce((acc, r) => {
@@ -19,8 +22,6 @@ function Reports() {
         return acc
     }, {})
     const maxCategoryCount = Math.max(1, ...Object.values(byCategory))
-
-
 
     const byAgent = requests.reduce((acc, r) => {
         if (!r.assignedToName) return acc
@@ -58,6 +59,16 @@ function Reports() {
         URL.revokeObjectURL(url)
     }
 
+    const handleStatClick = (key) => {
+        if (key === 'agents') {
+            agentTableRef.current?.scrollIntoView({ behavior: 'smooth' })
+            return
+        }
+        setActiveFilter(activeFilter === key ? null : key)
+    }
+
+    const filteredRows = activeFilter === 'total' ? requests : activeFilter === 'resolved' ? resolvedList : []
+
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
@@ -77,19 +88,65 @@ function Reports() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                <button
+                    onClick={() => handleStatClick('total')}
+                    className={`text-left bg-white rounded-xl border shadow-sm p-4 transition ${
+                        activeFilter === 'total' ? 'border-purple-400 ring-2 ring-purple-100' : 'border-gray-200 hover:border-purple-200'
+                    }`}
+                >
                     <p className="text-2xl font-bold text-gray-900">{total}</p>
                     <p className="text-xs text-gray-500">Total Requests</p>
-                </div>
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                </button>
+                <button
+                    onClick={() => handleStatClick('resolved')}
+                    className={`text-left bg-white rounded-xl border shadow-sm p-4 transition ${
+                        activeFilter === 'resolved' ? 'border-purple-400 ring-2 ring-purple-100' : 'border-gray-200 hover:border-purple-200'
+                    }`}
+                >
                     <p className="text-2xl font-bold text-gray-900">{resolved}</p>
                     <p className="text-xs text-gray-500">Resolved Requests ({resolvedPct}%)</p>
-                </div>
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                </button>
+                <button
+                    onClick={() => handleStatClick('agents')}
+                    className="text-left bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:border-purple-200 transition"
+                >
                     <p className="text-2xl font-bold text-gray-900">{Object.keys(byAgent).length}</p>
                     <p className="text-xs text-gray-500">Active Agents</p>
-                </div>
+                </button>
             </div>
+
+            {activeFilter && (
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-6">
+                    <h2 className="font-bold text-gray-900 mb-3">
+                        {activeFilter === 'total' ? 'All Requests' : 'Resolved Requests'}
+                    </h2>
+                    <table className="w-full text-sm">
+                        <thead>
+                        <tr className="text-left text-gray-500 border-b border-gray-100">
+                            <th className="py-2">Ticket ID</th>
+                            <th>Request</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Assigned To</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {filteredRows.map((r) => (
+                            <tr key={r.id} className="border-b border-gray-50 last:border-0">
+                                <td className="py-2">#{r.id}</td>
+                                <td>{r.description}</td>
+                                <td>{r.category || 'Unclassified'}</td>
+                                <td>{r.status.replace(/_/g, ' ')}</td>
+                                <td>{r.assignedToName || 'Unassigned'}</td>
+                            </tr>
+                        ))}
+                        {filteredRows.length === 0 && (
+                            <tr><td colSpan={5} className="py-4 text-center text-gray-400">Nothing here.</td></tr>
+                        )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
@@ -111,7 +168,7 @@ function Reports() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                <div ref={agentTableRef} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                     <h2 className="font-bold text-gray-900 mb-3">Support Team Performance</h2>
                     <table className="w-full text-sm">
                         <thead>

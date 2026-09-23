@@ -21,3 +21,19 @@ export async function apiRequest(path, { method = 'GET', body, auth = true } = {
 
     return data
 }
+
+export async function downloadAttachment(requestId, attachmentId, fileName) {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+    const res = await fetch(`${BASE_URL}/requests/${requestId}/attachments/${attachmentId}/download`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+    if (!res.ok) throw new Error('Failed to download attachment')
+
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    link.click()
+    URL.revokeObjectURL(url)
+}

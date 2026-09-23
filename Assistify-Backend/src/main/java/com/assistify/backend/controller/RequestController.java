@@ -121,5 +121,20 @@ public class RequestController {
                 requestService.addAttachment(id, file)
         );
     }
+    @GetMapping("/{id}/attachments/{attachmentId}/download")
+    public ResponseEntity<byte[]> downloadAttachment(
+            @PathVariable Long id,
+            @PathVariable Long attachmentId,
+            @AuthenticationPrincipal User user
+    ) {
+        RequestAttachment attachment = requestService.getAttachmentForDownload(id, attachmentId, user);
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + attachment.getFileName() + "\"")
+                .contentType(attachment.getFileType() != null
+                        ? org.springframework.http.MediaType.parseMediaType(attachment.getFileType())
+                        : org.springframework.http.MediaType.APPLICATION_OCTET_STREAM)
+                .body(attachment.getFileData());
+    }
 
 }

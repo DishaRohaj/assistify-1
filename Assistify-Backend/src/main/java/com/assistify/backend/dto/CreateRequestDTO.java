@@ -6,4 +6,6 @@ import lombok.Data;
 public class CreateRequestDTO {
     private String description;
     private String category;
+    private String additionalDetails;
+    private String contactPreference;
 }

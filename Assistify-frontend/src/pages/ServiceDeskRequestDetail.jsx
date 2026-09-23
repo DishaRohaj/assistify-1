@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { apiRequest } from '../api/client'
+import AttachmentsList from '../components/AttachmentsList'
 
 function ServiceDeskRequestDetail() {
     const { id } = useParams()
@@ -72,6 +73,7 @@ function ServiceDeskRequestDetail() {
                     </div>
                 </div>
             </div>
+            <AttachmentsList requestId={id} attachments={request.attachments} className="mb-6" />
 
             <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-purple-200 shadow-sm p-6 space-y-5 max-w-xl">
                 <h2 className="font-bold text-gray-900">Validate & Classify Request</h2>
