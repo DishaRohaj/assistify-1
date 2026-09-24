@@ -71,8 +71,21 @@ function ServiceDeskRequestDetail() {
                             {request.raisedByDepartment || '-'} / {request.raisedByLocation || '-'}
                         </p>
                     </div>
+                    <div>
+                        <p className="text-gray-400">Preferred Contact Method</p>
+                        <p className="font-medium text-gray-900">{request.contactPreference || '-'}</p>
+                    </div>
                 </div>
+
+                {request.additionalDetails && (
+                    <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <p className="text-xs font-semibold text-gray-500 mb-1">Additional Details from Requester</p>
+                        <p className="text-sm text-gray-700">{request.additionalDetails}</p>
+                    </div>
+                )}
             </div>
+
+
             <AttachmentsList requestId={id} attachments={request.attachments} className="mb-6" />
 
             <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-purple-200 shadow-sm p-6 space-y-5 max-w-xl">
@@ -99,6 +112,12 @@ function ServiceDeskRequestDetail() {
                         <option value="MEDIUM">Medium</option>
                         <option value="HIGH">High</option>
                     </select>
+
+                    <div className="mt-2 bg-purple-50 border border-purple-100 rounded-lg p-3 text-xs text-gray-700 space-y-1.5">
+                        <p><span className="font-semibold text-red-600">High</span> — Business-critical system down, multiple users affected, security issue, or complete work stoppage.</p>
+                        <p><span className="font-semibold text-amber-600">Medium</span> — Single user affected, or a workaround exists but the user is still blocked.</p>
+                        <p><span className="font-semibold text-gray-600">Low</span> — Minor/cosmetic issue, non-urgent request (e.g. new software install), no blocking impact.</p>
+                    </div>
                 </div>
 
                 <div>

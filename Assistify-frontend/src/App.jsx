@@ -27,13 +27,12 @@ import TeamWorkload from './pages/TeamWorkload'
 import AdminLayout from './layouts/AdminLayout'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminUsers from './pages/AdminUsers'
-import AdminConfig from './pages/AdminConfig'
 import Register from './pages/Register'
 import UserProfile from './pages/UserProfile'
 import RaiseRequest from './pages/RaiseRequest'
 import RequestDetail from './pages/RequestDetail'
 import HelpSupport from './pages/HelpSupport'
-
+import Notifications from './pages/Notifications'
 
 function App() {
     return (
@@ -70,7 +69,6 @@ function App() {
                         <Route path="dashboard" element={<AdminDashboard />} />
                         <Route path="users" element={<AdminUsers />} />
                         <Route path="knowledge-base" element={<KnowledgeBase />} />
-                        <Route path="config" element={<AdminConfig />} />
                     </Route>
 
                     <Route path="/manager" element={<ManagerLayout />}>
@@ -91,6 +89,7 @@ function App() {
                         <Route path="/knowledge-base" element={<KnowledgeBase />} />
                         <Route path="/user-profile" element={<UserProfile />} />
                         <Route path="/help-support" element={<HelpSupport />} />
+                        <Route path="/notifications" element={<Notifications />} />
                     </Route>
 
 

@@ -5,11 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="28cc466a-8ed2-4f25-8ef4-144870e2344d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Assistify-frontend/src/api/client.js" beforeDir="false" afterPath="$PROJECT_DIR$/Assistify-frontend/src/api/client.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assistify-frontend/src/pages/AdminDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assistify-frontend/src/pages/AdminDashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assistify-frontend/src/pages/MyPerformance.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assistify-frontend/src/pages/MyPerformance.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assistify-frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assistify-frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assistify-frontend/src/layouts/AdminLayout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assistify-frontend/src/layouts/AdminLayout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assistify-frontend/src/pages/AdminConfig.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assistify-frontend/src/pages/AdminUsers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assistify-frontend/src/pages/AdminUsers.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assistify-frontend/src/pages/RaiseRequest.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assistify-frontend/src/pages/RaiseRequest.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assistify-frontend/src/pages/Reports.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assistify-frontend/src/pages/Reports.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assistify-frontend/src/pages/RequestDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assistify-frontend/src/pages/RequestDetail.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assistify-frontend/src/pages/ServiceDeskRequestDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assistify-frontend/src/pages/ServiceDeskRequestDetail.jsx" afterDir="false" />
     </list>

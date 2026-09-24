@@ -24,10 +24,13 @@ public class AdminService {
         return userRepository.save(user);
     }
 
-    public void deactivateUser(Long userId, User currentAdmin) {
+    public User setUserActive(Long userId, boolean active, User currentAdmin) {
         if (userId.equals(currentAdmin.getId())) {
             throw new RuntimeException("You cannot deactivate your own account.");
         }
-        userRepository.deleteById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        user.setActive(active);
+        return userRepository.save(user);
     }
 }

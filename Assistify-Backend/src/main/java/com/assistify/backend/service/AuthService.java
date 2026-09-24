@@ -32,6 +32,10 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
+        if (!user.isActive()) {
+            throw new RuntimeException("Your account has been deactivated. Please contact your administrator.");
+        }
+
         String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
 
         return new AuthResponseDTO(token, user.getId(), user.getEmail(), user.getFullName(), user.getRole().name(), user.getDepartment());

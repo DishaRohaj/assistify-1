@@ -31,6 +31,10 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @org.hibernate.annotations.ColumnDefault("1")
+    @Column(nullable = false)
+    private boolean active = true;
+
     public enum Role {
         USER, SERVICE_DESK, L1_SUPPORT, L2_SUPPORT, MANAGER, ADMIN
     }

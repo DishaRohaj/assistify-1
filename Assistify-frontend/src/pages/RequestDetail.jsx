@@ -120,7 +120,16 @@ function RequestDetail() {
                             <p className="text-sm text-gray-900">{ticket.description}</p>
                         </div>
 
+                        {ticket.additionalDetails && (
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Additional Details</p>
+                                <p className="text-sm text-gray-900">{ticket.additionalDetails}</p>
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-2 gap-4">
+
+
                             <div>
                                 <p className="text-xs text-gray-500 mb-1">Category</p>
                                 <p className="text-sm text-gray-900">{ticket.category || 'Not classified yet'}</p>
@@ -146,9 +155,15 @@ function RequestDetail() {
                                         : 'Not yet updated'}
                                 </p>
                             </div>
+
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Preferred Contact Method</p>
+                                <p className="text-sm text-gray-900">{ticket.contactPreference || '-'}</p>
+                            </div>
                         </div>
 
                     </div>
+
 
                     {ticket.resolutionSummary && (
                         <div className="bg-white rounded-xl border border-green-200 shadow-sm p-6">

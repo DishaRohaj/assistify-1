@@ -1,5 +1,6 @@
 package com.assistify.backend.controller;
 
+import com.assistify.backend.dto.SetUserActiveDTO;
 import com.assistify.backend.dto.UpdateUserRoleDTO;
 import com.assistify.backend.entity.User;
 import com.assistify.backend.service.AdminService;
@@ -29,9 +30,8 @@ public class AdminController {
         return ResponseEntity.ok(adminService.updateUserRole(id, dto.getRole()));
     }
 
-    @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deactivateUser(@PathVariable Long id, @AuthenticationPrincipal User currentAdmin) {
-        adminService.deactivateUser(id, currentAdmin);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/users/{id}/active")
+    public ResponseEntity<User> setUserActive(@PathVariable Long id, @RequestBody SetUserActiveDTO dto, @AuthenticationPrincipal User currentAdmin) {
+        return ResponseEntity.ok(adminService.setUserActive(id, dto.isActive(), currentAdmin));
     }
 }
