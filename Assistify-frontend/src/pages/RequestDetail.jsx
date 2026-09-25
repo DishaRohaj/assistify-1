@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Check, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Check, RotateCcw, Send } from 'lucide-react'
 import { apiRequest } from '../api/client'
 import AttachmentsList from '../components/AttachmentsList'
 
@@ -8,6 +8,7 @@ const statusColor = {
     OPEN: 'bg-purple-100 text-purple-700',
     ASSIGNED: 'bg-amber-100 text-amber-700',
     IN_PROGRESS: 'bg-blue-100 text-blue-700',
+    NEED_MORE_INFO: 'bg-cyan-100 text-cyan-700',
     RESOLVED: 'bg-green-100 text-green-700',
     PENDING_USER_CONFIRMATION: 'bg-orange-100 text-orange-700',
     CLOSED: 'bg-gray-200 text-gray-600',
@@ -24,6 +25,7 @@ function RequestDetail() {
     const [actionLoading, setActionLoading] = useState(false)
     const [showReopenBox, setShowReopenBox] = useState(false)
     const [reopenReason, setReopenReason] = useState('')
+    const [moreInfoResponse, setMoreInfoResponse] = useState('')
 
     const load = () => {
         setLoading(true)
@@ -63,6 +65,24 @@ function RequestDetail() {
             setReopenReason('')
         } catch (err) {
             setError(err.message || 'Failed to reopen request.')
+        } finally {
+            setActionLoading(false)
+        }
+    }
+
+    const handleProvideMoreInfo = async () => {
+        if (!moreInfoResponse.trim()) return
+        setActionLoading(true)
+        setError('')
+        try {
+            const updated = await apiRequest(`/requests/${id}/provide-more-info`, {
+                method: 'PUT',
+                body: { response: moreInfoResponse },
+            })
+            setTicket(updated)
+            setMoreInfoResponse('')
+        } catch (err) {
+            setError(err.message || 'Failed to submit your response.')
         } finally {
             setActionLoading(false)
         }
@@ -129,7 +149,6 @@ function RequestDetail() {
 
                         <div className="grid grid-cols-2 gap-4">
 
-
                             <div>
                                 <p className="text-xs text-gray-500 mb-1">Category</p>
                                 <p className="text-sm text-gray-900">{ticket.category || 'Not classified yet'}</p>
@@ -138,6 +157,19 @@ function RequestDetail() {
                             <div>
                                 <p className="text-xs text-gray-500 mb-1">Priority</p>
                                 <p className="text-sm text-gray-900">{ticket.priority || 'Not set yet'}</p>
+                            </div>
+
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Assigned To</p>
+                                <p className="text-sm text-gray-900">{ticket.assignedToName || 'Not yet assigned'}</p>
+                            </div>
+
+                            <div>
+                                <p className="text-xs text-gray-500 mb-1">Preferred Contact Method</p>
+                                <p className="text-sm text-gray-900">
+                                    {ticket.contactPreference || '-'}
+                                    {ticket.contactPreference === 'Phone' && ticket.phoneNumber ? ` (${ticket.phoneNumber})` : ''}
+                                </p>
                             </div>
 
                             <div>
@@ -155,15 +187,32 @@ function RequestDetail() {
                                         : 'Not yet updated'}
                                 </p>
                             </div>
-
-                            <div>
-                                <p className="text-xs text-gray-500 mb-1">Preferred Contact Method</p>
-                                <p className="text-sm text-gray-900">{ticket.contactPreference || '-'}</p>
-                            </div>
                         </div>
 
                     </div>
 
+                    {ticket.status === 'NEED_MORE_INFO' && ticket.moreInfoRequest && (
+                        <div className="bg-white rounded-xl border border-cyan-200 shadow-sm p-6 space-y-4">
+                            <h2 className="font-bold text-gray-900">Our support team needs more information</h2>
+                            <div className="bg-cyan-50 border border-cyan-100 rounded-lg p-3">
+                                <p className="text-sm text-cyan-800">{ticket.moreInfoRequest}</p>
+                            </div>
+                            <textarea
+                                value={moreInfoResponse}
+                                onChange={(e) => setMoreInfoResponse(e.target.value)}
+                                placeholder="Type your response here..."
+                                rows={3}
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none"
+                            />
+                            <button
+                                onClick={handleProvideMoreInfo}
+                                disabled={actionLoading || !moreInfoResponse.trim()}
+                                className="flex items-center gap-2 bg-cyan-600 text-white text-sm font-medium px-4 py-2 rounded-lg disabled:opacity-60"
+                            >
+                                <Send size={16} /> Submit Response
+                            </button>
+                        </div>
+                    )}
 
                     {ticket.resolutionSummary && (
                         <div className="bg-white rounded-xl border border-green-200 shadow-sm p-6">

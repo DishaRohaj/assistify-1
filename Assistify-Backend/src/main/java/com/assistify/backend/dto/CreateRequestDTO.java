@@ -8,4 +8,5 @@ public class CreateRequestDTO {
     private String category;
     private String additionalDetails;
     private String contactPreference;
+    private String phoneNumber;
 }

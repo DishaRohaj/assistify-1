@@ -35,6 +35,7 @@ public class RequestService {
         request.setRaisedBy(user);
         request.setAdditionalDetails(dto.getAdditionalDetails());
         request.setContactPreference(dto.getContactPreference());
+        request.setPhoneNumber(dto.getPhoneNumber());
         if (dto.getCategory() != null && !dto.getCategory().isBlank()) {
             request.setCategory(Request.Category.valueOf(dto.getCategory()));
         }
@@ -113,7 +114,7 @@ public class RequestService {
 
     }
     public RequestAttachment getAttachmentForDownload(Long requestId, Long attachmentId, User user) {
-        getByIdForUser(requestId, user); // throws if user isn't the owner or staff
+        getByIdForUser(requestId, user);
         RequestAttachment attachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new RuntimeException("Attachment not found: " + attachmentId));
         if (!attachment.getRequest().getId().equals(requestId)) {
@@ -231,6 +232,59 @@ public class RequestService {
             notificationService.notifyUser(
                     saved.getAssignedTo(),
                     "Ticket #" + saved.getId() + " was reopened by the requester.",
+                    saved.getId()
+            );
+        }
+        return saved;
+    }
+
+    public Request requestMoreInfo(Long id, String message) {
+        Request request = requestRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Request not found: " + id));
+
+        if (request.getStatus() == Request.Status.NEED_MORE_INFO) {
+            throw new RuntimeException("Additional information has already been requested for this ticket.");
+        }
+        if (request.getStatus() == Request.Status.CLOSED) {
+            throw new RuntimeException("Cannot request more information on a closed ticket.");
+        }
+
+        request.setPreviousStatus(request.getStatus());
+        request.setStatus(Request.Status.NEED_MORE_INFO);
+        request.setMoreInfoRequest(message);
+        request.setMoreInfoResponse(null);
+        request.setUpdatedAt(java.time.LocalDateTime.now());
+
+        Request saved = requestRepository.save(request);
+        notificationService.notifyUser(
+                saved.getRaisedBy(),
+                "Ticket #" + saved.getId() + " needs more information from you: " + message,
+                saved.getId()
+        );
+        return saved;
+    }
+
+    public Request provideMoreInfo(Long id, User user, String response) {
+        Request request = requestRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Request not found: " + id));
+
+        if (!request.getRaisedBy().getId().equals(user.getId())) {
+            throw new RuntimeException("You are not allowed to respond to this request.");
+        }
+        if (request.getStatus() != Request.Status.NEED_MORE_INFO) {
+            throw new RuntimeException("This ticket is not currently awaiting additional information.");
+        }
+
+        request.setMoreInfoResponse(response);
+        request.setStatus(request.getPreviousStatus() != null ? request.getPreviousStatus() : Request.Status.OPEN);
+        request.setPreviousStatus(null);
+        request.setUpdatedAt(java.time.LocalDateTime.now());
+
+        Request saved = requestRepository.save(request);
+        if (saved.getAssignedTo() != null) {
+            notificationService.notifyUser(
+                    saved.getAssignedTo(),
+                    "Ticket #" + saved.getId() + " - the requester has provided the additional information you asked for.",
                     saved.getId()
             );
         }

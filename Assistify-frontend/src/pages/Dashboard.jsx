@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { apiRequest } from '../api/client'
-import { Clock, CheckCircle2, Headphones, Send, Bell, UserCircle } from 'lucide-react'
+import { Clock, CheckCircle2, Headphones, Send, Bell, UserCircle, HelpCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 
@@ -8,6 +8,7 @@ const statusColor = {
     OPEN: 'bg-purple-100 text-purple-700',
     ASSIGNED: 'bg-amber-100 text-amber-700',
     IN_PROGRESS: 'bg-blue-100 text-blue-700',
+    NEED_MORE_INFO: 'bg-cyan-100 text-cyan-700',
     RESOLVED: 'bg-green-100 text-green-700',
     PENDING_USER_CONFIRMATION: 'bg-orange-100 text-orange-700',
     CLOSED: 'bg-gray-200 text-gray-600',
@@ -57,6 +58,14 @@ function Dashboard() {
             filter: 'In Progress'
         },
         {
+            label: 'Need More Info',
+            value: tickets.filter(t => t.status === 'NEED_MORE_INFO').length,
+            color: 'border-cyan-500',
+            icon: HelpCircle,
+            iconColor: 'text-cyan-500',
+            filter: 'Need More Info'
+        },
+        {
             label: 'Waiting for Feedback',
             value: tickets.filter(t => t.status === 'PENDING_USER_CONFIRMATION').length,
             color: 'border-green-500',
@@ -77,7 +86,6 @@ function Dashboard() {
 
     return (
         <div>
-            {/* Top bar */}
             <div className="flex items-center justify-between mb-6">
 
                 <h1 className="text-2xl font-bold text-gray-900">
@@ -113,10 +121,8 @@ function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left/main column */}
                 <div className="lg:col-span-2 space-y-6">
-                    {/* Stat cards */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
 
                         {stats.map(({ label, value, color, icon: Icon, iconColor, filter }) => (
                             <button
@@ -140,7 +146,6 @@ function Dashboard() {
 
                     </div>
 
-                    {/* Ask AI box */}
                     <div className="bg-white rounded-xl border border-purple-200 shadow-sm p-6">
                         <div className="flex items-center gap-3 mb-1">
                             <Headphones className="text-purple-500" size={22} />
@@ -161,7 +166,6 @@ function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Tickets table */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                         <div className="flex justify-between items-center mb-3">
                             <span className="text-sm font-medium text-gray-500">Recent Tickets</span>
@@ -200,7 +204,6 @@ function Dashboard() {
                     </div>
                 </div>
 
-                {/* Right column */}
                 <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">

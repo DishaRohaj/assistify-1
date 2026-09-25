@@ -2,7 +2,9 @@ package com.assistify.backend.controller;
 import com.assistify.backend.dto.AssignRequestDTO;
 import com.assistify.backend.dto.ClassifyRequestDTO;
 import com.assistify.backend.dto.CreateRequestDTO;
+import com.assistify.backend.dto.ProvideMoreInfoDTO;
 import com.assistify.backend.dto.ReopenRequestDTO;
+import com.assistify.backend.dto.RequestMoreInfoDTO;
 import com.assistify.backend.entity.Request;
 import com.assistify.backend.entity.User;
 import com.assistify.backend.repository.UserRepository;
@@ -110,6 +112,17 @@ public class RequestController {
     @PutMapping("/{id}/reopen")
     public ResponseEntity<Request> reopen(@PathVariable Long id, @RequestBody ReopenRequestDTO dto, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(requestService.reopenTicket(id, user, dto.getReason()));
+    }
+
+    @PutMapping("/{id}/request-more-info")
+    @PreAuthorize("hasRole('SERVICE_DESK') or hasRole('L1_SUPPORT') or hasRole('L2_SUPPORT')")
+    public ResponseEntity<Request> requestMoreInfo(@PathVariable Long id, @RequestBody RequestMoreInfoDTO dto) {
+        return ResponseEntity.ok(requestService.requestMoreInfo(id, dto.getMessage()));
+    }
+
+    @PutMapping("/{id}/provide-more-info")
+    public ResponseEntity<Request> provideMoreInfo(@PathVariable Long id, @RequestBody ProvideMoreInfoDTO dto, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(requestService.provideMoreInfo(id, user, dto.getResponse()));
     }
 
     @PostMapping("/{id}/attachments")

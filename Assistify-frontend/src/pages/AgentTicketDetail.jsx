@@ -11,6 +11,9 @@ function AgentTicketDetail() {
     const [escalateTo, setEscalateTo] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const [moreInfoMessage, setMoreInfoMessage] = useState('')
+    const [moreInfoLoading, setMoreInfoLoading] = useState(false)
+    const [moreInfoError, setMoreInfoError] = useState('')
 
     const load = () => {
         apiRequest(`/requests/${id}`).then(setTicket).catch(console.error)
@@ -52,7 +55,26 @@ function AgentTicketDetail() {
         }
     }
 
+    const handleRequestMoreInfo = async () => {
+        if (!moreInfoMessage.trim()) return
+        setMoreInfoError('')
+        setMoreInfoLoading(true)
+        try {
+            await apiRequest(`/requests/${id}/request-more-info`, {
+                method: 'PUT',
+                body: { message: moreInfoMessage },
+            })
+            navigate('/agent/my-tickets')
+        } catch (err) {
+            setMoreInfoError(err.message)
+        } finally {
+            setMoreInfoLoading(false)
+        }
+    }
+
     if (!ticket) return <div>Loading...</div>
+
+    const canRequestMoreInfo = ticket.status !== 'NEED_MORE_INFO' && ticket.status !== 'CLOSED'
 
     return (
         <div className="max-w-3xl">
@@ -78,12 +100,33 @@ function AgentTicketDetail() {
                         <p className="text-gray-400">Category / Priority</p>
                         <p className="font-medium text-gray-900">{ticket.category || '-'} / {ticket.priority || '-'}</p>
                     </div>
+                    <div>
+                        <p className="text-gray-400">Preferred Contact Method</p>
+                        <p className="font-medium text-gray-900">
+                            {ticket.contactPreference || '-'}
+                            {ticket.contactPreference === 'Phone' && ticket.phoneNumber ? ` (${ticket.phoneNumber})` : ''}
+                        </p>
+                    </div>
                 </div>
 
                 {ticket.escalatedByName && (
                     <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3">
                         <p className="text-xs font-semibold text-amber-700 mb-1">Escalated by</p>
                         <p className="text-sm text-amber-700">{ticket.escalatedByName}</p>
+                    </div>
+                )}
+
+                {ticket.status === 'NEED_MORE_INFO' && ticket.moreInfoRequest && (
+                    <div className="mt-4 bg-cyan-50 border border-cyan-200 rounded-lg p-3">
+                        <p className="text-xs font-semibold text-cyan-700 mb-1">Waiting on requester for</p>
+                        <p className="text-sm text-cyan-800">{ticket.moreInfoRequest}</p>
+                    </div>
+                )}
+
+                {ticket.moreInfoResponse && (
+                    <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <p className="text-xs font-semibold text-gray-500 mb-1">Requester's Response</p>
+                        <p className="text-sm text-gray-700">{ticket.moreInfoResponse}</p>
                     </div>
                 )}
 
@@ -96,6 +139,27 @@ function AgentTicketDetail() {
             </div>
 
             {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">{error}</p>}
+
+            {canRequestMoreInfo && (
+                <div className="bg-white rounded-xl border border-cyan-200 shadow-sm p-6 space-y-4 mb-6">
+                    <h2 className="font-bold text-gray-900">Need More Info from Requester?</h2>
+                    <textarea
+                        value={moreInfoMessage}
+                        onChange={(e) => setMoreInfoMessage(e.target.value)}
+                        placeholder="Describe what additional information you need from the requester..."
+                        rows={3}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none"
+                    />
+                    {moreInfoError && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{moreInfoError}</p>}
+                    <button
+                        onClick={handleRequestMoreInfo}
+                        disabled={moreInfoLoading || !moreInfoMessage.trim()}
+                        className="bg-cyan-600 text-white text-sm font-medium px-4 py-2 rounded-lg disabled:opacity-60"
+                    >
+                        {moreInfoLoading ? 'Sending...' : 'Request More Info'}
+                    </button>
+                </div>
+            )}
 
             <form onSubmit={handleResolve} className="bg-white rounded-xl border border-green-200 shadow-sm p-6 space-y-4 mb-6">
                 <h2 className="font-bold text-gray-900">Resolve Ticket</h2>

@@ -24,6 +24,9 @@ public class Request {
     private Status status = Status.OPEN;
 
     @Enumerated(EnumType.STRING)
+    private Status previousStatus;
+
+    @Enumerated(EnumType.STRING)
     private Category category;
 
     @Enumerated(EnumType.STRING)
@@ -62,6 +65,20 @@ public class Request {
     private String additionalDetails;
 
     private String contactPreference;
+
+    private String phoneNumber;
+
+    @Column(length = 2000)
+    private String moreInfoRequest;
+
+    @Column(length = 2000)
+    private String moreInfoResponse;
+
+    @Column(nullable = false)
+    private boolean slaAtRiskNotified = false;
+
+    @Column(nullable = false)
+    private boolean slaBreachedNotified = false;
 
     @OneToMany(
             mappedBy = "request",
@@ -119,6 +136,7 @@ public class Request {
         OPEN,
         ASSIGNED,
         IN_PROGRESS,
+        NEED_MORE_INFO,
         RESOLVED,
         PENDING_USER_CONFIRMATION,
         CLOSED,

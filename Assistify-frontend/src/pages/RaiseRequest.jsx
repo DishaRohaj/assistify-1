@@ -5,6 +5,7 @@ import { apiRequest } from '../api/client'
 function RaiseRequest() {
     const [category, setCategory] = useState('')
     const [contact, setContact] = useState('Email')
+    const [phoneNumber, setPhoneNumber] = useState('')
     const [submitted, setSubmitted] = useState(false)
     const [description, setDescription] = useState('')
     const [error, setError] = useState('')
@@ -22,8 +23,6 @@ function RaiseRequest() {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        // Guard against double-submit: once a ticket has been created,
-        // block any further submit attempts until the form is reset.
         if (submitted || loading) return
 
         setError('')
@@ -31,7 +30,13 @@ function RaiseRequest() {
         try {
             const data = await apiRequest('/requests', {
                 method: 'POST',
-                body: { category, description, additionalDetails, contactPreference: contact },
+                body: {
+                    category,
+                    description,
+                    additionalDetails,
+                    contactPreference: contact,
+                    phoneNumber: contact === 'Phone' ? phoneNumber : null,
+                },
             })
             setTicketId(data.id)
 
@@ -74,6 +79,7 @@ function RaiseRequest() {
     const resetForm = () => {
         setCategory('')
         setContact('Email')
+        setPhoneNumber('')
         setSubmitted(false)
         setDescription('')
         setError('')
@@ -90,7 +96,6 @@ function RaiseRequest() {
             <p className="text-gray-500 mb-6">Tell us what you need help with and our support team will assist you.</p>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
                     <div className="flex justify-between items-center">
                         <h2 className="font-bold text-gray-900">Request Information</h2>
@@ -202,6 +207,17 @@ function RaiseRequest() {
                                     </label>
                                 ))}
                             </div>
+
+                            {contact === 'Phone' && (
+                                <input
+                                    type="tel"
+                                    required
+                                    value={phoneNumber}
+                                    onChange={(e) => setPhoneNumber(e.target.value)}
+                                    placeholder="Enter your phone number"
+                                    className="mt-3 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none disabled:bg-gray-100"
+                                />
+                            )}
                         </div>
                     </fieldset>
 
@@ -246,7 +262,6 @@ function RaiseRequest() {
                     </div>
                 </form>
 
-                {/* Your info panel */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 h-fit">
                     <h3 className="font-bold text-gray-900 mb-4">Your Information</h3>
                     <div className="space-y-3 text-sm">

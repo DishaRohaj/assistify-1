@@ -13,6 +13,9 @@ function ServiceDeskRequestDetail() {
     const [assignedToUserId, setAssignedToUserId] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const [moreInfoMessage, setMoreInfoMessage] = useState('')
+    const [moreInfoLoading, setMoreInfoLoading] = useState(false)
+    const [moreInfoError, setMoreInfoError] = useState('')
 
     useEffect(() => {
         apiRequest(`/requests/${id}`).then((r) => {
@@ -40,7 +43,26 @@ function ServiceDeskRequestDetail() {
         }
     }
 
+    const handleRequestMoreInfo = async () => {
+        if (!moreInfoMessage.trim()) return
+        setMoreInfoError('')
+        setMoreInfoLoading(true)
+        try {
+            await apiRequest(`/requests/${id}/request-more-info`, {
+                method: 'PUT',
+                body: { message: moreInfoMessage },
+            })
+            navigate('/service-desk/dashboard')
+        } catch (err) {
+            setMoreInfoError(err.message)
+        } finally {
+            setMoreInfoLoading(false)
+        }
+    }
+
     if (!request) return <div className="p-8">Loading...</div>
+
+    const canRequestMoreInfo = request.status !== 'NEED_MORE_INFO' && request.status !== 'CLOSED'
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -55,7 +77,7 @@ function ServiceDeskRequestDetail() {
                         <h1 className="text-xl font-bold text-gray-900">{request.description}</h1>
                     </div>
                     <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-                        {request.status}
+                        {request.status.replace(/_/g, ' ')}
                     </span>
                 </div>
 
@@ -73,7 +95,14 @@ function ServiceDeskRequestDetail() {
                     </div>
                     <div>
                         <p className="text-gray-400">Preferred Contact Method</p>
-                        <p className="font-medium text-gray-900">{request.contactPreference || '-'}</p>
+                        <p className="font-medium text-gray-900">
+                            {request.contactPreference || '-'}
+                            {request.contactPreference === 'Phone' && request.phoneNumber ? ` (${request.phoneNumber})` : ''}
+                        </p>
+                    </div>
+                    <div>
+                        <p className="text-gray-400">Assigned To</p>
+                        <p className="font-medium text-gray-900">{request.assignedToName || 'Not yet assigned'}</p>
                     </div>
                 </div>
 
@@ -83,10 +112,45 @@ function ServiceDeskRequestDetail() {
                         <p className="text-sm text-gray-700">{request.additionalDetails}</p>
                     </div>
                 )}
+
+                {request.status === 'NEED_MORE_INFO' && request.moreInfoRequest && (
+                    <div className="mt-4 bg-cyan-50 border border-cyan-200 rounded-lg p-3">
+                        <p className="text-xs font-semibold text-cyan-700 mb-1">Waiting on requester for</p>
+                        <p className="text-sm text-cyan-800">{request.moreInfoRequest}</p>
+                    </div>
+                )}
+
+                {request.moreInfoResponse && (
+                    <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <p className="text-xs font-semibold text-gray-500 mb-1">Requester's Response</p>
+                        <p className="text-sm text-gray-700">{request.moreInfoResponse}</p>
+                    </div>
+                )}
             </div>
 
 
             <AttachmentsList requestId={id} attachments={request.attachments} className="mb-6" />
+
+            {canRequestMoreInfo && (
+                <div className="bg-white rounded-xl border border-cyan-200 shadow-sm p-6 space-y-4 max-w-xl mb-6">
+                    <h2 className="font-bold text-gray-900">Need More Info from Requester?</h2>
+                    <textarea
+                        value={moreInfoMessage}
+                        onChange={(e) => setMoreInfoMessage(e.target.value)}
+                        placeholder="Describe what additional information you need from the requester..."
+                        rows={3}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none"
+                    />
+                    {moreInfoError && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{moreInfoError}</p>}
+                    <button
+                        onClick={handleRequestMoreInfo}
+                        disabled={moreInfoLoading || !moreInfoMessage.trim()}
+                        className="bg-cyan-600 text-white text-sm font-medium px-4 py-2 rounded-lg disabled:opacity-60"
+                    >
+                        {moreInfoLoading ? 'Sending...' : 'Request More Info'}
+                    </button>
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-purple-200 shadow-sm p-6 space-y-5 max-w-xl">
                 <h2 className="font-bold text-gray-900">Validate & Classify Request</h2>

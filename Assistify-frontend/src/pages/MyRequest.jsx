@@ -8,6 +8,7 @@ const tabs = [
     'Open',
     'Assigned',
     'In Progress',
+    'Need More Info',
     'Resolved',
     'Pending User Confirmation',
     'Closed'
@@ -17,6 +18,7 @@ const statusColor = {
     OPEN: 'bg-purple-100 text-purple-700',
     ASSIGNED: 'bg-amber-100 text-amber-700',
     IN_PROGRESS: 'bg-blue-100 text-blue-700',
+    NEED_MORE_INFO: 'bg-cyan-100 text-cyan-700',
     RESOLVED: 'bg-green-100 text-green-700',
     PENDING_USER_CONFIRMATION: 'bg-orange-100 text-orange-700',
     CLOSED: 'bg-gray-200 text-gray-600',
@@ -43,7 +45,6 @@ function MyRequest() {
         setActiveTab(searchParams.get('status') || 'All')
     }, [searchParams])
 
-    // Filter tickets according to selected tab
     const filteredTickets =
         activeTab === 'All'
             ? tickets
@@ -56,7 +57,6 @@ function MyRequest() {
     return (
         <div>
 
-            {/* Page Heading */}
             <h1 className="text-3xl font-bold text-gray-900 mb-1">
                 My Request
             </h1>
@@ -65,7 +65,6 @@ function MyRequest() {
                 Track and manage all your IT support requests.
             </p>
 
-            {/* Search + Filters */}
             <div className="flex gap-3 mb-6">
 
                 <div className="flex-1 flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 py-2">
@@ -89,14 +88,13 @@ function MyRequest() {
 
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-6 border-b border-gray-200 mb-6">
+            <div className="flex gap-6 border-b border-gray-200 mb-6 overflow-x-auto">
 
                 {tabs.map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`pb-2 text-sm font-medium ${
+                        className={`pb-2 text-sm font-medium whitespace-nowrap ${
                             activeTab === tab
                                 ? 'text-purple-600 border-b-2 border-purple-600'
                                 : 'text-gray-500'
@@ -108,7 +106,6 @@ function MyRequest() {
 
             </div>
 
-            {/* Info Banner */}
             <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6">
 
                 <p className="font-semibold text-gray-900 text-sm">
@@ -121,7 +118,6 @@ function MyRequest() {
 
             </div>
 
-            {/* Table */}
             <div className="bg-white rounded-xl border border-purple-200 shadow-sm p-4">
 
                 <div className="flex justify-between items-center mb-3">
@@ -134,7 +130,6 @@ function MyRequest() {
 
                 <table className="w-full text-sm">
 
-                    {/* Table Header */}
                     <thead>
 
                     <tr className="text-left text-gray-500 border-b border-gray-100">
@@ -143,6 +138,7 @@ function MyRequest() {
                         <th>Issue</th>
                         <th>Priority</th>
                         <th>Status</th>
+                        <th>Assigned To</th>
                         <th>Created on</th>
                         <th>Updated on</th>
                         <th>Action</th>
@@ -151,7 +147,6 @@ function MyRequest() {
 
                     </thead>
 
-                    {/* Table Body */}
                     <tbody>
 
                     {filteredTickets.map((r, i) => (
@@ -168,7 +163,7 @@ function MyRequest() {
                             <td>{r.description}</td>
 
                             <td>
-                                {r.priority}
+                                {r.priority || '-'}
                             </td>
 
                             <td>
@@ -179,14 +174,16 @@ function MyRequest() {
                                             'bg-gray-100 text-gray-600'
                                         }`}
                                     >
-                                        {r.status}
+                                        {r.status.replace(/_/g, ' ')}
                                     </span>
 
                             </td>
 
+                            <td>{r.assignedToName || 'Not yet assigned'}</td>
+
                             <td>{new Date(r.createdAt).toLocaleDateString()}</td>
 
-                            <td>{r.updatedAt ? new Date(r.updatedAt).toLocaleDateString() : '—'}</td>
+                            <td>{r.updatedAt ? new Date(r.updatedAt).toLocaleDateString() : '-'}</td>
 
                             <td>
 

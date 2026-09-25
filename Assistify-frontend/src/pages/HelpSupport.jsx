@@ -8,6 +8,7 @@ import {
     Phone,
     ChevronDown,
     LifeBuoy,
+    ArrowUpCircle,
 } from 'lucide-react'
 
 const faqs = [
@@ -31,6 +32,13 @@ const faqs = [
         q: 'Who do I contact for urgent issues?',
         a: 'For urgent issues outside normal support hours, please use the phone number listed below to reach the IT Service Desk directly.',
     },
+]
+
+const escalationLevels = [
+    { level: 'L1 Support', when: 'Your ticket has not been assigned within 24 hours, or you need direct troubleshooting help.', contact: 'l1support@assistify.com' },
+    { level: 'L2 Support', when: 'Your ticket has been escalated by L1 and you need a status update.', contact: 'l2support@assistify.com' },
+    { level: 'Service Desk', when: 'Your ticket is still Open and unassigned after 24 hours.', contact: 'servicedesk@assistify.com' },
+    { level: 'IT Manager', when: 'Your issue remains unresolved after going through the above steps.', contact: 'manager@assistify.com' },
 ]
 
 function HelpSupport() {
@@ -61,7 +69,6 @@ function HelpSupport() {
     return (
         <div className="max-w-4xl">
 
-            {/* Header */}
             <div className="flex items-center gap-3 mb-6">
                 <div className="w-11 h-11 rounded-xl bg-purple-100 flex items-center justify-center">
                     <LifeBuoy size={22} className="text-purple-600" />
@@ -74,7 +81,6 @@ function HelpSupport() {
                 </div>
             </div>
 
-            {/* Quick Links */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                 {quickLinks.map(({ label, desc, icon: Icon, action }) => (
                     <button
@@ -89,7 +95,6 @@ function HelpSupport() {
                 ))}
             </div>
 
-            {/* Contact Card */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
                 <h2 className="font-bold text-gray-900 mb-4">Contact the IT Service Desk</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -114,7 +119,27 @@ function HelpSupport() {
                 </div>
             </div>
 
-            {/* FAQ */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
+                <div className="flex items-center gap-2 mb-4">
+                    <ArrowUpCircle size={18} className="text-purple-600" />
+                    <h2 className="font-bold text-gray-900">Escalation Matrix</h2>
+                </div>
+                <p className="text-sm text-gray-500 mb-4">
+                    If your ticket has not been assigned, or your issue remains unresolved, follow this path to escalate.
+                </p>
+                <div className="space-y-3">
+                    {escalationLevels.map((item) => (
+                        <div key={item.level} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border border-gray-100 rounded-lg p-3">
+                            <div>
+                                <p className="text-sm font-semibold text-gray-900">{item.level}</p>
+                                <p className="text-xs text-gray-500">{item.when}</p>
+                            </div>
+                            <p className="text-sm font-medium text-purple-600 shrink-0">{item.contact}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <h2 className="font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
                 <div className="divide-y divide-gray-100">

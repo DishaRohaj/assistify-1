@@ -11,4 +11,5 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findAllByOrderByCreatedAtDesc();
     List<Request> findByAssignedToOrderByCreatedAtDesc(User assignedTo);
     List<Request> findByEscalatedByOrderByCreatedAtDesc(User escalatedBy);
+    List<Request> findByResolutionDueAtIsNotNullAndStatusNotIn(List<Request.Status> statuses);
 }
