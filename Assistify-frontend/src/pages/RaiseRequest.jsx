@@ -49,7 +49,7 @@ function RaiseRequest() {
                     const token = localStorage.getItem('token') || sessionStorage.getItem('token')
 
                     const response = await fetch(
-                        `http://localhost:8080/api/requests/${data.id}/attachments`,
+                        `${(import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/$/, '')}/api/requests/${data.id}/attachments`,
                         {
                             method: 'POST',
                             headers: { Authorization: `Bearer ${token}` },

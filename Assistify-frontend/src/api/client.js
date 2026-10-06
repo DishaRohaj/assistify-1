@@ -1,4 +1,5 @@
-const BASE_URL = 'http://localhost:8080/api'
+const API_ORIGIN = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/$/, '')
+const BASE_URL = `${API_ORIGIN}/api`
 
 export async function apiRequest(path, { method = 'GET', body, auth = true } = {}) {
     const headers = { 'Content-Type': 'application/json' }
